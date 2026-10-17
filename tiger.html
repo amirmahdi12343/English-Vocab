@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tiger | ببر</title>
+<meta property="og:title" content="Tiger | ببر">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTECmrXHIPWe_FKva4j7Tx7HowYOPIZZiD2MJhHwRSX_Dnc_4nX3_6H9qQ&s=10">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #eef1f5; --card: #ffffff; --ink: #1b2430; --muted: #5d6b7c;
+    --accent: #0f766e; --accent-ink: #ffffff; --soft: #e3f1ef; --track: #d5dce5;
+    --shadow: 0 10px 30px rgba(27,36,48,.12); --err: #b42318;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #11161d; --card: #1a222c; --ink: #eef2f7; --muted: #9aa8b8;
+      --accent: #2dd4bf; --accent-ink: #062b27; --soft: #1f3a3b; --track: #2c3846;
+      --shadow: 0 10px 30px rgba(0,0,0,.45); --err: #ff8a80;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { min-height: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Vazirmatn", Tahoma, "Segoe UI", sans-serif;
+    min-height: 100vh; min-height: 100dvh;
+    display: flex; align-items: center; justify-content: center;
+    padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
+  }
+  .card { width: 100%; max-width: 420px; background: var(--card); border-radius: 28px; box-shadow: var(--shadow); overflow: hidden; }
+
+  .cover-btn { position: relative; display: block; width: 100%; padding: 0; border: 0; cursor: pointer; background: var(--track); aspect-ratio: 1/1; overflow: hidden; }
+  .cover-btn:not(.loaded):not(.failed) { background: linear-gradient(100deg, var(--track) 30%, var(--soft) 50%, var(--track) 70%); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+  .cover { display: block; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .3s; }
+  .cover-btn.loaded .cover { opacity: 1; }
+  .fallback { display: none; position: absolute; inset: 0; place-items: center; font-size: 6rem; font-weight: 800; color: var(--accent); background: var(--soft); }
+  .cover-btn.failed .fallback { display: grid; }
+  .cover-btn.failed .cover { display: none; }
+  .badge { position: absolute; bottom: 14px; left: 14px; width: 40px; height: 40px; border-radius: 50%; background: rgba(0,0,0,.55); color: #fff; display: grid; place-items: center; backdrop-filter: blur(4px); }
+  .badge svg { width: 20px; height: 20px; fill: currentColor; }
+  .cover-btn:focus-visible, .ctl:focus-visible, .pill:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+  .body { padding: 24px 22px 22px; text-align: center; }
+  .word { margin: 0; font-size: 2.6rem; font-weight: 800; line-height: 1.2; letter-spacing: .01em; }
+  .fa { margin: 6px 0 22px; font-size: 1.2rem; color: var(--muted); }
+
+  .controls { display: flex; align-items: center; justify-content: center; gap: 18px; direction: ltr; }
+  .ctl { position: relative; width: 72px; height: 72px; border: 0; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; cursor: pointer; transition: transform .12s; }
+  .ctl:active { transform: scale(.94); }
+  .ctl svg { width: 30px; height: 30px; fill: currentColor; }
+  .ctl .i-pause, .ctl .spin { display: none; }
+  .ctl.is-playing .i-play { display: none; }
+  .ctl.is-playing .i-pause { display: block; }
+  .spin { position: absolute; inset: 8px; border-radius: 50%; border: 3px solid transparent; border-top-color: var(--accent-ink); animation: turn .8s linear infinite; }
+  .ctl.is-loading .spin { display: block; }
+  .ctl.is-loading svg { opacity: .35; }
+  @keyframes turn { to { transform: rotate(360deg); } }
+
+  .pill { min-width: 76px; padding: 10px 14px; border: 1.5px solid var(--track); border-radius: 999px; background: transparent; color: var(--ink); font: inherit; font-size: .9rem; cursor: pointer; }
+  .pill[aria-pressed="true"] { background: var(--soft); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+
+  .bar { height: 4px; margin: 22px 8px 0; border-radius: 2px; background: var(--track); overflow: hidden; direction: ltr; }
+  .bar i { display: block; height: 100%; width: 0; background: var(--accent); }
+
+  .error { display: none; margin: 14px 0 0; font-size: .9rem; color: var(--err); }
+  .credit { margin: 0; padding: 14px 22px 16px; border-top: 1px solid var(--track); text-align: center; font-size: .8rem; letter-spacing: .02em; color: var(--muted); }
+  @media (prefers-reduced-motion: reduce) { .cover-btn:not(.loaded):not(.failed) { animation: none; } .cover { transition: none; } }
+  .eq { display: flex; align-items: flex-end; justify-content: center; gap: 3px; height: 48px; margin: 22px 0 0; direction: ltr; }
+  .eq + .bar { margin-top: 12px; }
+  .eq i { flex: 1 1 0; min-width: 0; max-width: 7px; height: 100%; border-radius: 3px; background: var(--accent); transform-origin: bottom; transform: scaleY(.15); animation: eq var(--d, 1s) ease-in-out infinite; animation-delay: var(--l, 0s); animation-play-state: paused; }
+  .eq.on i { animation-play-state: running; }
+  @keyframes eq { 0%, 100% { transform: scaleY(.15); } 50% { transform: scaleY(var(--h, 1)); } }
+  .ctl.is-playing::after { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--accent); pointer-events: none; animation: pulse 1.4s ease-out infinite; }
+  @keyframes pulse { from { transform: scale(1); opacity: .7; } to { transform: scale(1.35); opacity: 0; } }
+
+  .example { margin: 22px 0 0; padding: 14px 16px; border-radius: 16px; background: var(--soft); }
+  .example .tag { margin: 0 0 6px; font-size: .78rem; color: var(--muted); }
+  .example .en { margin: 0; font-size: 1.05rem; line-height: 1.6; }
+  .example .en b { color: var(--accent); font-weight: 800; }
+  .example .fa-ex { margin: 6px 0 0; font-size: .95rem; line-height: 1.8; color: var(--muted); }
+  @media (prefers-reduced-motion: reduce) { .eq i, .ctl.is-playing::after { animation: none; } .eq i { transform: scaleY(.5); } }
+</style>
+</head>
+<body>
+
+<main class="card">
+
+  <button class="cover-btn" id="coverBtn" type="button" aria-label="پخش تلفظ Tiger">
+    <img class="cover" id="cover" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTECmrXHIPWe_FKva4j7Tx7HowYOPIZZiD2MJhHwRSX_Dnc_4nX3_6H9qQ&s=10" alt="Tiger">
+    <span class="fallback" aria-hidden="true">T</span>
+    <span class="badge" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 10v4h4l5 4V6L7 10H3zm13.5 2a4.5 4.5 0 0 0-2.5-4.03v8.06A4.5 4.5 0 0 0 16.5 12zM14 3.23v2.06a7 7 0 0 1 0 13.42v2.06a9 9 0 0 0 0-17.54z"/></svg></span>
+  </button>
+
+  <section class="body">
+    <h1 class="word" dir="ltr" lang="en">Tiger</h1>
+    <p class="fa">ببر</p>
+
+    <div class="controls">
+      <button class="pill" id="slow" type="button" aria-pressed="false">کُند</button>
+      <button class="ctl" id="play" type="button" aria-label="پخش">
+        <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>
+        <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4.5" height="14" rx="1.2"/><rect x="13.5" y="5" width="4.5" height="14" rx="1.2"/></svg>
+        <span class="spin" aria-hidden="true"></span>
+      </button>
+      <button class="pill" id="again" type="button">دوباره</button>
+    </div>
+
+    <div class="eq" id="eq" aria-hidden="true"><i style="--h:0.49;--d:0.71s;--l:-0.85s"></i><i style="--h:0.44;--d:0.98s;--l:-0.48s"></i><i style="--h:0.45;--d:0.96s;--l:-0.05s"></i><i style="--h:0.62;--d:0.65s;--l:-0.12s"></i><i style="--h:0.64;--d:1.18s;--l:-0.16s"></i><i style="--h:0.59;--d:1.04s;--l:-1.23s"></i><i style="--h:0.76;--d:0.88s;--l:-1.27s"></i><i style="--h:0.55;--d:1.20s;--l:-0.38s"></i><i style="--h:0.62;--d:0.68s;--l:-0.40s"></i><i style="--h:0.94;--d:0.73s;--l:-0.76s"></i><i style="--h:0.88;--d:0.86s;--l:-0.71s"></i><i style="--h:0.62;--d:0.64s;--l:-0.27s"></i><i style="--h:0.94;--d:0.90s;--l:-0.41s"></i><i style="--h:0.91;--d:0.92s;--l:-0.39s"></i><i style="--h:1.00;--d:1.09s;--l:-0.32s"></i><i style="--h:0.92;--d:0.97s;--l:-1.14s"></i><i style="--h:1.00;--d:0.80s;--l:-1.27s"></i><i style="--h:0.69;--d:0.89s;--l:-0.98s"></i><i style="--h:0.71;--d:0.94s;--l:-0.05s"></i><i style="--h:0.97;--d:1.14s;--l:-0.74s"></i><i style="--h:1.00;--d:0.82s;--l:-0.90s"></i><i style="--h:0.92;--d:1.01s;--l:-0.59s"></i><i style="--h:1.00;--d:1.26s;--l:-0.62s"></i><i style="--h:0.93;--d:0.64s;--l:-0.91s"></i><i style="--h:0.91;--d:1.30s;--l:-1.07s"></i><i style="--h:0.72;--d:0.87s;--l:-0.87s"></i><i style="--h:0.58;--d:0.92s;--l:-0.22s"></i><i style="--h:0.60;--d:0.64s;--l:-1.00s"></i><i style="--h:0.59;--d:0.77s;--l:-0.51s"></i><i style="--h:0.88;--d:0.66s;--l:-0.58s"></i><i style="--h:0.72;--d:1.22s;--l:-1.07s"></i><i style="--h:0.81;--d:0.79s;--l:-0.54s"></i><i style="--h:0.59;--d:1.22s;--l:-1.25s"></i><i style="--h:0.49;--d:0.72s;--l:-0.30s"></i><i style="--h:0.49;--d:0.94s;--l:-0.77s"></i><i style="--h:0.47;--d:0.60s;--l:-0.54s"></i></div>
+    <div class="bar" aria-hidden="true"><i id="fill"></i></div>
+    <p class="error" id="error" role="alert">فایل صوتی پیدا نشد. اینترنت را بررسی کنید و دوباره امتحان کنید.</p>
+
+    <div class="example">
+      <p class="tag">مثال</p>
+      <p class="en" dir="ltr" lang="en">The <b>tiger</b> can run fast.</p>
+      <p class="fa-ex">ببر می‌تواند سریع بدود.</p>
+    </div>
+
+    <audio id="audio" src="https://dictionary.cambridge.org/media/english/us_pron/t/tig/tiger/tiger.mp3" preload="metadata"></audio>
+  </section>
+
+  <footer class="credit" dir="ltr">By Amir Mahdi Zamani</footer>
+
+</main>
+
+<script>
+  var audio = document.getElementById('audio');
+  var playBtn = document.getElementById('play');
+  var coverBtn = document.getElementById('coverBtn');
+  var img = document.getElementById('cover');
+  var slow = document.getElementById('slow');
+  var again = document.getElementById('again');
+  var fill = document.getElementById('fill');
+  var err = document.getElementById('error');
+  var eq = document.getElementById('eq');
+
+  function showError() { err.style.display = 'block'; playBtn.classList.remove('is-loading', 'is-playing'); coverBtn.classList.remove('is-playing'); eq.classList.remove('on'); }
+  function start() {
+    err.style.display = 'none';
+    var p = audio.play();
+    if (p && p.catch) p.catch(showError);
+  }
+  function toggle() { if (audio.paused) start(); else audio.pause(); }
+
+  playBtn.addEventListener('click', toggle);
+  coverBtn.addEventListener('click', toggle);
+  again.addEventListener('click', function () { audio.currentTime = 0; start(); });
+  slow.addEventListener('click', function () {
+    var on = slow.getAttribute('aria-pressed') !== 'true';
+    slow.setAttribute('aria-pressed', on);
+    audio.playbackRate = audio.defaultPlaybackRate = on ? 0.6 : 1;
+  });
+
+  audio.addEventListener('play', function () {
+    playBtn.classList.add('is-playing');
+    coverBtn.classList.add('is-playing'); eq.classList.add('on');
+    playBtn.setAttribute('aria-label', 'مکث');
+  });
+  audio.addEventListener('pause', function () {
+    playBtn.classList.remove('is-playing', 'is-loading');
+    coverBtn.classList.remove('is-playing'); eq.classList.remove('on');
+    playBtn.setAttribute('aria-label', 'پخش');
+  });
+  audio.addEventListener('ended', function () {
+    playBtn.classList.remove('is-playing', 'is-loading');
+    coverBtn.classList.remove('is-playing'); eq.classList.remove('on');
+    playBtn.setAttribute('aria-label', 'پخش');
+    fill.style.width = '0';
+  });
+  audio.addEventListener('waiting', function () { playBtn.classList.add('is-loading'); });
+  audio.addEventListener('playing', function () { playBtn.classList.remove('is-loading'); });
+  var raf = 0;
+  function paint() { fill.style.width = audio.duration ? (audio.currentTime / audio.duration * 100) + '%' : '0'; }
+  function loop() { paint(); raf = requestAnimationFrame(loop); }
+  audio.addEventListener('playing', function () { cancelAnimationFrame(raf); loop(); });
+  audio.addEventListener('pause', function () { cancelAnimationFrame(raf); paint(); });
+  audio.addEventListener('ended', function () { cancelAnimationFrame(raf); fill.style.width = '0'; });
+  audio.addEventListener('timeupdate', paint);
+  audio.addEventListener('seeked', paint);
+  audio.addEventListener('error', showError);
+
+  function imgOk() { coverBtn.classList.add('loaded'); }
+  function imgBad() { coverBtn.classList.add('failed'); }
+  img.addEventListener('load', imgOk);
+  img.addEventListener('error', imgBad);
+  if (img.complete) { if (img.naturalWidth) imgOk(); else imgBad(); }
+</script>
+</body>
+</html>
